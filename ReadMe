@@ -1,1 +1,5 @@
-git push origin HEAD:master
+About git using:
+    git push origin HEAD:master
+
+Float window:
+    http://blog.csdn.net/guolin_blog/article/details/8689140
