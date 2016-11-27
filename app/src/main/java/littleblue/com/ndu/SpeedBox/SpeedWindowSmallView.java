@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import java.lang.reflect.Field;
 import littleblue.com.ndu.R;
 import littleblue.com.ndu.Utils.LogNdu;
 
@@ -23,8 +23,13 @@ import littleblue.com.ndu.Utils.LogNdu;
 public class SpeedWindowSmallView extends LinearLayout {
     private String TAG = "SpeedWindowSmallView";
 
+    private int mStatusBarHeight = 0;
+
     public SpeedWindowSmallView(Context context) {
         super(context);
+
+        mStatusBarHeight = getStatusBarHeight();
+        LogNdu.i(TAG, "mStatusBarHeight: " + mStatusBarHeight);
 
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         View view = LayoutInflater.from(context).inflate(R.layout.speed_window_small, this);
@@ -57,7 +62,7 @@ public class SpeedWindowSmallView extends LinearLayout {
         layoutParams.width = viewWidth;
         layoutParams.height = viewHeight;
         layoutParams.x = screenWidth/3;
-        layoutParams.y = -45;//screenHeight;
+        layoutParams.y = -mStatusBarHeight;//screenHeight;
 
         view.setLayoutParams(layoutParams);
         windowManager.addView(view, layoutParams);
@@ -71,5 +76,25 @@ public class SpeedWindowSmallView extends LinearLayout {
     public static boolean isColorDark(@ColorInt int color) {
         double darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255;
         return darkness >= 0.5;
+    }
+
+    /**
+     * Get status bar height
+     * @return statusBarHeight
+     */
+    private int getStatusBarHeight() {
+        int statusBarHeight = 0;
+        if (statusBarHeight == 0) {
+            try {
+                Class<?> c = Class.forName("com.android.internal.R$dimen");
+                Object o = c.newInstance();
+                Field field = c.getField("status_bar_height");
+                int x = (Integer) field.get(o);
+                statusBarHeight = getResources().getDimensionPixelSize(x);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return statusBarHeight;
     }
 }
