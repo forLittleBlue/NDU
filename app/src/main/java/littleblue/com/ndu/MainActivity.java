@@ -10,6 +10,8 @@ import littleblue.com.ndu.SpeedBox.SpeedWindowSmallView;
 public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
 
+    private SpeedWindowSmallView mSpeedWindowSmallView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,6 +19,12 @@ public class MainActivity extends AppCompatActivity {
 
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
 
-        SpeedWindowSmallView speedWindowSmallView = new SpeedWindowSmallView(this);
+        mSpeedWindowSmallView = new SpeedWindowSmallView(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+//        mSpeedWindowSmallView.removeBoxView();
+        super.onDestroy();
     }
 }

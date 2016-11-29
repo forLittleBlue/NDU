@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/speed_small"
-    android:layout_width="40dp"
-    android:layout_height="18dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/speed_text"
-        android:textSize="14dp"
-        android:gravity="left"
-        android:textColor="@android:color/white"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:alpha="0.9"
+        android:gravity="left"
+        android:shadowColor="@android:color/black"
+        android:shadowDx="4"
+        android:shadowDy="0"
+        android:shadowRadius="1"
+        android:textColor="@android:color/white"
+        android:textSize="14dp" />
 
-</LinearLayout>
+    <ImageView
+        android:id="@+id/speed_box_support_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/speed_text"
+        android:gravity="bottom"></ImageView>
+
+</RelativeLayout>
