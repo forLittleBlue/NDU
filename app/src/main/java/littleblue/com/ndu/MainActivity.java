@@ -24,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-//        mSpeedWindowSmallView.removeBoxView();
+        mSpeedWindowSmallView.removeBoxView();
         super.onDestroy();
     }
+
 }

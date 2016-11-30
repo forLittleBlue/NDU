@@ -4,7 +4,11 @@ About git using:
 Float window:
     http://blog.csdn.net/guolin_blog/article/details/8689140
 
+Screen shot cut:
                 setDrawingCacheEnabled(true);
                 Bitmap bm = getDrawingCache();
                 int[] pixels = new int[bm.getWidth() * bm.getHeight()];
                 bm.setPixels(pixels, offset, stride, x, y, width, height);
+
+Make a CircleLayout:
+https://github.com/dmitry-zaitsev/CircleLayout

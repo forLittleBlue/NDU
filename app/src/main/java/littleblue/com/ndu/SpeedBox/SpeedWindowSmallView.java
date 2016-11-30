@@ -89,6 +89,7 @@ public class SpeedWindowSmallView extends RelativeLayout {
 
         mBoxInScreenX = DataSaveUtils.getSpeedBoxX(context);
         mBoxInScreenY = DataSaveUtils.getSpeedBoxY(context);
+        //mBoxInScreenY = mScreenHeight/2;
         checkRange();
 
         //mBoxViewWidth = mSpeedBoxView.getMeasuredWidth();//mSpeedBoxView.getLayoutParams().width;
@@ -102,7 +103,7 @@ public class SpeedWindowSmallView extends RelativeLayout {
 
     private void addView() {
         mLayoutParams = new WindowManager.LayoutParams();
-        mLayoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+        mLayoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;//TYPE_SYSTEM_OVERLAY 比 TYPE_PHONE 更高级，可以避免应用程序改变状态栏时被覆盖，但是不能点击滑动
         mLayoutParams.format = PixelFormat.RGBA_8888;
         mLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL // 不阻塞事件传递到后面的窗口
                 //| WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
@@ -164,11 +165,11 @@ public class SpeedWindowSmallView extends RelativeLayout {
         }
         if (pressed) {
             mSpeedBoxView.setBackgroundColor(getResources().getColor(R.color.glass_grey));
-            mSpeedBoxView.setAlpha(0.7F);
+            mSpeedBoxView.setAlpha(0.9F);
             mSupportView.setBackgroundColor(getResources().getColor(R.color.grey_blue));
             mSupportView.setAlpha(0.7F);
         } else {
-            mHandler.sendEmptyMessageDelayed(MSG_DELAY_CHANGE_BOX_VIEW, 500);
+            mHandler.sendEmptyMessageDelayed(MSG_DELAY_CHANGE_BOX_VIEW, 800);
         }
     }
 
