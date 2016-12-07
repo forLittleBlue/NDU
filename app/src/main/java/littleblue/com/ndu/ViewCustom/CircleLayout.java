@@ -42,11 +42,13 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import littleblue.com.ndu.R;
+import littleblue.com.ndu.Utils.LogNdu;
 
 /**
  * 显示圆形，中间添加几个view，就可显示几个，layout里面设置app:layoutMode="pie"显示为圆形，app:innerRadius="5dp"表示内部圆心半径，app:angleRange="180"表示大圆显示角度范围
  */
 public class CircleLayout extends ViewGroup {
+	private String TAG = "CircleLayout";
 
 	public static final int LAYOUT_NORMAL = 1;
 	public static final int LAYOUT_PIE = 2;
@@ -82,12 +84,13 @@ public class CircleLayout extends ViewGroup {
 	
 	public CircleLayout(Context context) {
 		this(context, null);
+		LogNdu.i(TAG, "CircleLayout(Context context)");
 	}
 	
 	@SuppressLint("NewApi")
 	public CircleLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		
+		LogNdu.i(TAG, "CircleLayout(Context context, AttributeSet attrs)");
 		mDividerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		
@@ -101,7 +104,7 @@ public class CircleLayout extends ViewGroup {
 				int innerColor = a.getColor(R.styleable.CircleLayout_innerCircle, getResources().getColor(android.R.color.white));
 				mCirclePaint.setColor(innerColor);
 			}
-			
+
 			mDividerPaint.setColor(dividerColor);
 			
 			mAngleOffset = a.getFloat(R.styleable.CircleLayout_angleOffset, 90f);
@@ -195,6 +198,7 @@ public class CircleLayout extends ViewGroup {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		LogNdu.i(TAG, "onMeasure widthMeasureSpec: " + widthMeasureSpec + " heightMeasureSpec: " + heightMeasureSpec);
 		final int count = getChildCount();
 
 		int maxHeight = 0;
@@ -247,6 +251,7 @@ public class CircleLayout extends ViewGroup {
 	@Override
 	@SuppressWarnings("deprecation")
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+		LogNdu.i(TAG, "onLayout changed: " + changed + " l: " + l + " t: " + t + " r: " + r + " b: " + b);
 		final int childs = getChildCount();
 		
 		float totalWeight = 0f;
@@ -317,11 +322,13 @@ public class CircleLayout extends ViewGroup {
 	
 	@Override
 	protected LayoutParams generateDefaultLayoutParams() {
+		LogNdu.i(TAG, " generateDefaultLayoutParams");
 		return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 	}
 	
 	@Override
 	protected LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+		LogNdu.i(TAG, "generateLayoutParams");
 		LayoutParams lp = new LayoutParams(p.width, p.height);
 		
 		if(p instanceof LinearLayout.LayoutParams) {
@@ -333,16 +340,19 @@ public class CircleLayout extends ViewGroup {
 	
 	@Override
 	public LayoutParams generateLayoutParams(AttributeSet attrs) {
+		LogNdu.i(TAG, "generateLayoutParams");
 		return new LayoutParams(getContext(), attrs);
 	}
 	
 	@Override
 	protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+		LogNdu.i(TAG, "checkLayoutParams");
 		return p instanceof LayoutParams;
 	}
 	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
+		LogNdu.i(TAG, "dispatchTouchEvent ");
 		if(mLayoutMode == LAYOUT_NORMAL) {
 			return super.dispatchTouchEvent(ev);
 		}

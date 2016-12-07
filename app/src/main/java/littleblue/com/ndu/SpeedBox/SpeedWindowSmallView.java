@@ -104,6 +104,8 @@ public class SpeedWindowSmallView extends RelativeLayout {
     private void addView() {
         mLayoutParams = new WindowManager.LayoutParams();
         mLayoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;//TYPE_SYSTEM_OVERLAY 比 TYPE_PHONE 更高级，可以避免应用程序改变状态栏时被覆盖，但是不能点击滑动
+        //mLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+//        mLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
         mLayoutParams.format = PixelFormat.RGBA_8888;
         mLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL // 不阻塞事件传递到后面的窗口
                 //| WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
