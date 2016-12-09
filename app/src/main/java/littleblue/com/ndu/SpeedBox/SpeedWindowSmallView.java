@@ -1,24 +1,18 @@
 package littleblue.com.ndu.SpeedBox;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.ColorInt;
-import android.support.v4.graphics.ColorUtils;
-import android.text.format.DateUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -62,13 +56,6 @@ public class SpeedWindowSmallView extends RelativeLayout {
         mBoxViewHeight = mStatusBarHeight;
         LogNdu.i(TAG, "mStatusBarHeight: " + mStatusBarHeight);
         initSpeedBox(mContext);
-
-        mSpeedBoxView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LogNdu.i(TAG, "mSpeedBoxView click ");
-            }
-        });
     }
 
     private void initSpeedBox(Context context) {
@@ -81,6 +68,7 @@ public class SpeedWindowSmallView extends RelativeLayout {
         mSpeedText.setText("hello");
         mSupportView = (ImageView) mSpeedBoxView.findViewById(R.id.speed_box_support_view);
 
+        //获取屏幕大小
         Point point = new Point();
         mWindowManager.getDefaultDisplay().getSize(point);
         mScreenWidth = point.x;
@@ -107,18 +95,18 @@ public class SpeedWindowSmallView extends RelativeLayout {
         //mLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 //        mLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
         mLayoutParams.format = PixelFormat.RGBA_8888;
-        mLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL // 不阻塞事件传递到后面的窗口
+        mLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL // 不阻塞事件传递到后面的窗口, 不加可能会导致不响应屏幕其他点击
                 //| WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE // 悬浮窗口较小时，后面的应用图标由不可长按变为可长按,弹出的View收不到Back键的事件
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE // 悬浮窗口较小时，后面的应用图标由不可长按变为可长按,不加会导致屏蔽back键
                         | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS; //不受手机界面限制，比如y值设置为负的时候可以在状态栏上显示
 
-        mLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-        mLayoutParams.width = mBoxViewWidth;
+        mLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;//设置起点位置，当mLayoutParams.x=0，mLayoutParams.y=0时，起点是左上角
+        mLayoutParams.width = mBoxViewWidth; //宽高必须设置
         mLayoutParams.height = mBoxViewHeight;//这里设置view的实际高度，这时mBoxViewHeight要比view布局里面设置的height要小，所以布局里面height最好设为match_parent
         mLayoutParams.x = mBoxInScreenX;
         mLayoutParams.y = mBoxInScreenY - mStatusBarHeight;//mScreenHeight/2;//-mStatusBarHeight;
 
-        mSpeedBoxView.setLayoutParams(mLayoutParams);
+//        mSpeedBoxView.setLayoutParams(mLayoutParams);
         mWindowManager.addView(mSpeedBoxView, mLayoutParams);
     }
 

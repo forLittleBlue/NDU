@@ -6,6 +6,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import littleblue.com.ndu.SpeedBox.SpeedWindowSmallView;
+import littleblue.com.ndu.ViewCustom.SideSlideView;
 
 public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
@@ -19,12 +20,13 @@ public class MainActivity extends AppCompatActivity {
 
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
 
-        mSpeedWindowSmallView = new SpeedWindowSmallView(this);
+//        mSpeedWindowSmallView = new SpeedWindowSmallView(this);
+        new SideSlideView(this);
     }
 
     @Override
     protected void onDestroy() {
-        mSpeedWindowSmallView.removeBoxView();
+        //mSpeedWindowSmallView.removeBoxView();
         super.onDestroy();
     }
 
