@@ -17,6 +17,10 @@ import littleblue.com.ndu.Utils.LogNdu;
 public class OvalView extends View {
     private String TAG = "OvalView";
 
+    private int mViewHeight;
+    private int mViewWidth;
+    private int mColor;
+
     public OvalView(Context context) {
         this(context, null);
         LogNdu.i(TAG, "OvalView(context)");
@@ -43,13 +47,22 @@ public class OvalView extends View {
         RectF rectF = new RectF();//矩形
         rectF.top = 0;
         rectF.left = 0;
-        rectF.right = 100;
-        rectF.bottom = 300;
+        rectF.right = mViewWidth;
+        rectF.bottom = mViewHeight;
 
         Paint paint = new Paint();
-        paint.setColor(getResources().getColor(R.color.glass_grey));
-        paint.setStrokeWidth(5);
-        canvas.drawOval(rectF, paint);
-//        canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), paint);
+        paint.setColor(mColor);
+//        canvas.drawOval(rectF, paint);
+//        canvas.drawRoundRect(rectF, mViewWidth, mViewWidth*6, paint);//调整rx和ry可以得到带不同的弧度圆角的矩形
+        canvas.drawRoundRect(0, 0, mViewWidth, mViewHeight, mViewWidth, mViewWidth*6, paint);//调整rx和ry可以得到带不同的弧度圆角的矩形
+    }
+
+    public void setWidthAndHeight(int width, int height) {
+        mViewHeight = height;
+        mViewWidth = width;
+    }
+
+    public void setColor(int color) {
+        mColor = color;
     }
 }

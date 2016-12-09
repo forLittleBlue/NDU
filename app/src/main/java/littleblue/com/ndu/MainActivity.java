@@ -12,6 +12,7 @@ public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
 
     private SpeedWindowSmallView mSpeedWindowSmallView;
+    private SideSlideView mSideSlideView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,12 +22,13 @@ public class MainActivity extends AppCompatActivity {
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
 
 //        mSpeedWindowSmallView = new SpeedWindowSmallView(this);
-        new SideSlideView(this);
+        mSideSlideView = new SideSlideView(this);
     }
 
     @Override
     protected void onDestroy() {
         //mSpeedWindowSmallView.removeBoxView();
+        mSideSlideView.removeSideSlideView();
         super.onDestroy();
     }
 

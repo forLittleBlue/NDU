@@ -23,9 +23,12 @@ public class SideSlideView extends RelativeLayout {
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mLayoutParams;
     private View mSideSlideView;
+    private OvalView mOvalView;
 
     private int mScreenHeight;
     private int mScreenWidth;
+    private int mSideViewHeight;
+    private int mSideViewWidth;
 
     public SideSlideView(Context context) {
         this(context, null);
@@ -39,6 +42,7 @@ public class SideSlideView extends RelativeLayout {
     private void initSideSlideView(Context context) {
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mSideSlideView = LayoutInflater.from(context).inflate(R.layout.side_slide_vew, this);
+        mOvalView = (OvalView) findViewById(R.id.side_oval_view);
 
         Point point = new Point();
         mWindowManager.getDefaultDisplay().getSize(point);
@@ -46,20 +50,37 @@ public class SideSlideView extends RelativeLayout {
         mScreenWidth = point.x;
         LogNdu.i(TAG, "mScreenWidth: " + mScreenWidth + " mScreenHeight: " + mScreenHeight);
 
+        mSideViewHeight = mScreenHeight / 3;
+        mSideViewWidth = mScreenWidth/ 24;
+
+        mOvalView.setWidthAndHeight(mSideViewWidth, mSideViewHeight);
+        mOvalView.setColor(getResources().getColor(R.color.glass_grey));
+        mOvalView.setAlpha(0.5f);
+
         mLayoutParams = new WindowManager.LayoutParams();
         mLayoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
         mLayoutParams.format = PixelFormat.RGBA_8888;
         mLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;
         mLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        mLayoutParams.width = 100;
-        mLayoutParams.height = 100;
-        mLayoutParams.x = 0;
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        mLayoutParams.width = mSideViewWidth;
+        mLayoutParams.height = mSideViewHeight;
+        mLayoutParams.x = -mSideViewWidth/2;
         mLayoutParams.y = mScreenHeight/2;
-//        mSideSlideView.setLayoutParams(mLayoutParams);
         mWindowManager.addView(mSideSlideView, mLayoutParams);
 
+    }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        LogNdu.i(TAG, "onMeasure getWidth: " + getWidth() + " getHeight: " + getHeight());
+
+    }
+
+    public void removeSideSlideView() {
+        mWindowManager.removeView(mSideSlideView);
     }
 
 }
