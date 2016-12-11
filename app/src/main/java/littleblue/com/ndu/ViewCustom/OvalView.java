@@ -52,9 +52,9 @@ public class OvalView extends View {
 
         Paint paint = new Paint();
         paint.setColor(mColor);
-//        canvas.drawOval(rectF, paint);
+        canvas.drawOval(rectF, paint);
 //        canvas.drawRoundRect(rectF, mViewWidth, mViewWidth*6, paint);//调整rx和ry可以得到带不同的弧度圆角的矩形
-        canvas.drawRoundRect(0, 0, mViewWidth, mViewHeight, mViewWidth, mViewWidth*6, paint);//调整rx和ry可以得到带不同的弧度圆角的矩形
+//        canvas.drawRoundRect(0, 0, mViewWidth, mViewHeight, mViewWidth, mViewWidth*5, paint);//调整rx和ry可以得到带不同的弧度圆角的矩形
     }
 
     public void setWidthAndHeight(int width, int height) {
