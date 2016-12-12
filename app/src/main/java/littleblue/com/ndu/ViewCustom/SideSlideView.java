@@ -1,17 +1,24 @@
 package littleblue.com.ndu.ViewCustom;
 
+import android.app.Instrumentation;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
+
+import java.lang.reflect.Field;
 
 import littleblue.com.ndu.R;
 import littleblue.com.ndu.Utils.DataSaveUtils;
@@ -32,17 +39,30 @@ public class SideSlideView extends RelativeLayout {
     private OvalView mOvalView;
     private GestureDetector mGestureDetector;
 
+    private int TYPE_CHANGE_SIZE = 1;
+    private int TYPE_CHANGE_POSITHION_MOVE = 2;
+    private int TYPE_CHANGE_POSITHION_DONE = 3;
+    private int TYPE_CHANGE_ALL = 4;
+    private final int TYPE_FLING_HORIZON = 0;
+    private final int TYPE_FLING_DOWN = 1;
+    private final int TYPE_FLING_UP = 2;
+
     private int mScreenHeight;
     private int mScreenWidth;
     private int mSideViewHeight;
     private int mSideViewWidth;
     private int mViewInScreenX;
     private int mViewInScreenY;
-    private int TYPE_CHANGE_SIZE = 1;
-    private int TYPE_CHANGE_POSITHION_MOVE = 2;
-    private int TYPE_CHANGE_POSITHION_DONE = 3;
-    private int TYEP_CHANGE_ALL = 4;
+    private int mStatusBarHeight;
 
+    private int mStartMoveX = 0;
+    private int mEndMoveX = 0;
+    private int mStartMoveY = 0;
+    private int mEndMoveY = 0;
+    private int mXInSideView = 0;
+    private int mYInSideView = 0;
+    private int mMovedX = 0;
+    private boolean mCanMove = false;
 
     public SideSlideView(Context context) {
         this(context, null);
@@ -66,10 +86,11 @@ public class SideSlideView extends RelativeLayout {
         mWindowManager.getDefaultDisplay().getSize(point);
         mScreenHeight = point.y;
         mScreenWidth = point.x;
+        mStatusBarHeight = getStatusBarHeight();
         LogNdu.i(TAG, "mScreenWidth: " + mScreenWidth + " mScreenHeight: " + mScreenHeight);
 
         mSideViewHeight = mScreenHeight / 3;
-        mSideViewWidth = mScreenWidth/ 18;
+        mSideViewWidth = mScreenWidth/ 10;
 
         mViewInScreenX = DataSaveUtils.getSideSlideX(context);
         mViewInScreenY = DataSaveUtils.getSideSlideY(context);
@@ -90,7 +111,7 @@ public class SideSlideView extends RelativeLayout {
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
         mWindowManager.addView(mSideSlideView, mLayoutParams);
-        upateView(mSideViewWidth, mSideViewHeight, mViewInScreenX, mViewInScreenY, TYEP_CHANGE_ALL);
+        upateView(mSideViewWidth, mSideViewHeight, mViewInScreenX, mViewInScreenY, TYPE_CHANGE_ALL);
     }
 
     private void updateViewSize(int width, int height) {
@@ -102,29 +123,31 @@ public class SideSlideView extends RelativeLayout {
     }
 
     private void upateView(int width, int height, int x, int y, int type) {
-        if (TYPE_CHANGE_SIZE == type || TYEP_CHANGE_ALL == type) {
+        if (TYPE_CHANGE_SIZE == type || TYPE_CHANGE_ALL == type) {
             mLayoutParams.width = width;
             mLayoutParams.height = height;
-            mLayoutParams.x = mViewInScreenX - mMovedX;
+            //mLayoutParams.x = mViewInScreenX - mMovedX;
 
-            int newHeight = height;
-            if (mMovedX-mSideViewWidth>0) {
+           /* if (TYPE_CHANGE_SIZE == type) {
+                int newHeight = height;
+                if (mMovedX-mSideViewWidth>0) {
 //                newHeight= height * (mSideViewWidth/(mMovedX-mSideViewWidth));
-            }
-            mOvalView.setWidthAndHeight(width, newHeight);
-            mOvalView.postInvalidate();
+                }
+                mOvalView.setWidthAndHeight(width, newHeight);
+                mOvalView.postInvalidate();
+            }*/
         }
-        if (TYPE_CHANGE_POSITHION_MOVE == type || TYEP_CHANGE_ALL == type) {
+        if (TYPE_CHANGE_POSITHION_MOVE == type || TYPE_CHANGE_ALL == type) {
             mLayoutParams.x = x;
             if (mSideViewHeight + y > mScreenHeight) {
-                mLayoutParams.y = mScreenHeight - mSideViewHeight;
+                mLayoutParams.y = mScreenHeight - mStatusBarHeight - mSideViewHeight;
             } else if (y < 0) {
                 mLayoutParams.y = 0;
             } else {
                 mLayoutParams.y = y;
             }
         }
-        if (TYPE_CHANGE_POSITHION_DONE == type || TYEP_CHANGE_ALL == type) {
+        if (TYPE_CHANGE_POSITHION_MOVE != type) {
             if (x < mScreenWidth/2) {
                 mLayoutParams.x = -mSideViewWidth/2;
             } else {
@@ -134,11 +157,6 @@ public class SideSlideView extends RelativeLayout {
         mWindowManager.updateViewLayout(mSideSlideView, mLayoutParams);
     }
 
-    private int mStartMoveX = 0;
-    private int mXInSideView = 0;
-    private int mYInSideView = 0;
-    private int mMovedX = 0;
-    private boolean mCanMove = false;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //LogNdu.i(TAG, "Motion event: " + event.getAction());
@@ -147,6 +165,7 @@ public class SideSlideView extends RelativeLayout {
             case MotionEvent.ACTION_DOWN:
                 LogNdu.i(TAG, "Motion ACTION_DOWN");
                 mStartMoveX = (int) event.getRawX();
+                mStartMoveY = (int) event.getRawY();
                 mXInSideView = (int) event.getX();
                 mYInSideView = (int) event.getY();
                 postDelayed(mRunnable, 1500);
@@ -163,11 +182,13 @@ public class SideSlideView extends RelativeLayout {
                     mViewInScreenY = (int) event.getRawY() - mYInSideView;
                     updateViewPosition(mViewInScreenX, mViewInScreenY, TYPE_CHANGE_POSITHION_MOVE);
                 } else {
-                    updateViewSize(mSideViewWidth + 2*mMovedX, mSideViewHeight);
+                    //updateViewSize(mSideViewWidth + 2*mMovedX, mSideViewHeight);
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 LogNdu.i(TAG, "Motion ACTION_UP");
+                mEndMoveX = (int) event.getRawX();
+                mEndMoveY = (int) event.getRawY();
                 if (mCanMove) {
                     mCanMove = false;
                     updateViewPosition(mViewInScreenX, mViewInScreenY, TYPE_CHANGE_POSITHION_DONE);
@@ -175,7 +196,7 @@ public class SideSlideView extends RelativeLayout {
                     DataSaveUtils.saveSideSlideY(mContext, mViewInScreenY);
                 } else {
                     mMovedX = 0;
-                    updateViewSize(mSideViewWidth, mSideViewHeight);
+                    //updateViewSize(mSideViewWidth, mSideViewHeight);
                 }
                 removeCallbacks(mRunnable);
                 break;
@@ -190,9 +211,22 @@ public class SideSlideView extends RelativeLayout {
     private class MySimpleOnGestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            LogNdu.i(TAG, " onFling: e1: " + e1.getAction() + " e2: " + e2.getAction()
-                + " velocityX: " + velocityX + " velocityY: " + velocityY);
-
+            /*LogNdu.i(TAG, " onFling: e1: " + e1.getAction() + " e2: " + e2.getAction()
+                + " velocityX: " + velocityX + " velocityY: " + velocityY);*/
+            switch (getFlingType()) {
+                case TYPE_FLING_HORIZON:
+                    LogNdu.i(TAG, "onFling keyBack");
+                    keyBack();
+                    break;
+                case TYPE_FLING_DOWN:
+                    LogNdu.i(TAG, "onFling keyHome");
+                    keyHome();
+                    break;
+                case TYPE_FLING_UP:
+                    LogNdu.i(TAG, "onFling keyMenu");
+                    keyMenu();
+                    break;
+            }
             return true;
         }
 
@@ -206,6 +240,7 @@ public class SideSlideView extends RelativeLayout {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             LogNdu.i(TAG, "onDoubleTap e: " + e.getAction());
+            //keyHome();
             return true;
         }
 
@@ -215,35 +250,71 @@ public class SideSlideView extends RelativeLayout {
         }*/
     };
 
+    private int getFlingType() {
+        int xDistance = mEndMoveX - mStartMoveX;
+        int yDistance = mEndMoveY - mStartMoveY;
+        int xThreshold = 2*mSideViewWidth;
+        int yThreshold = mScreenHeight/16;
+        if (Math.abs(xDistance) < xThreshold && yDistance > yThreshold) {
+            return TYPE_FLING_DOWN;
+        } else if (Math.abs(xDistance) < xThreshold && yDistance < -yThreshold) {
+            return TYPE_FLING_UP;
+        } else {
+            return TYPE_FLING_HORIZON;
+        }
+    }
+
+    public void keyBack(){
+        new Thread(){
+            public void run() {
+                try{
+                    Instrumentation inst = new Instrumentation();
+                    inst.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+                }
+                catch (Exception e) {
+                    LogNdu.e("Exception when onBack", e.toString());
+                }
+            }
+        }.start();
+    }
+
+    public void keyHome(){
+        new Thread(){
+            public void run() {
+                try{
+                    Instrumentation inst = new Instrumentation();
+                    inst.sendKeyDownUpSync(KeyEvent.KEYCODE_HOME);
+                }
+                catch (Exception e) {
+                    LogNdu.e("Exception when onBack", e.toString());
+                }
+            }
+        }.start();
+    }
+
+    public void keyMenu(){
+        new Thread(){
+            public void run() {
+                try{
+                    Instrumentation inst = new Instrumentation();
+                    inst.sendKeyDownUpSync(KeyEvent.KEYCODE_MENU);
+                }
+                catch (Exception e) {
+                    LogNdu.e("Exception when onBack", e.toString());
+                }
+            }
+        }.start();
+    }
+
     private Runnable mRunnable = new Runnable() {
         @Override
         public void run() {
             LogNdu.i(TAG, "Pressed a while");
             //updateViewPosition(0, mViewInScreenY);
-            mVibrator.vibrate(1);
+            mVibrator.vibrate(100);
             mCanMove = true;
         }
     };
-
-    @Override
-    public boolean onGenericMotionEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_HOVER_ENTER:
-                LogNdu.i(TAG, "onGenericMotionEvent ACTION_HOVER_ENTER");
-                break;
-            case MotionEvent.ACTION_HOVER_EXIT:
-                LogNdu.i(TAG, "onGenericMotionEvent ACTION_HOVER_EXIT");
-                break;
-            case MotionEvent.ACTION_HOVER_MOVE:
-                LogNdu.i(TAG, "onGenericMotionEvent ACTION_HOVER_MOVE");
-                break;
-            case MotionEvent.ACTION_SCROLL:
-                int axis = (int) event.getRawX();
-                LogNdu.i(TAG, "onGenericMotionEvent ACTION_SCROLL " + event.getAxisValue(axis));
-                break;
-        }
-        return true;
-    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -255,5 +326,27 @@ public class SideSlideView extends RelativeLayout {
     public void removeSideSlideView() {
         mWindowManager.removeView(mSideSlideView);
     }
+
+    /**
+     * Get status bar height
+     *
+     * @return statusBarHeight
+     */
+    private int getStatusBarHeight() {
+        int statusBarHeight = 0;
+        if (statusBarHeight == 0) {
+            try {
+                Class<?> c = Class.forName("com.android.internal.R$dimen");
+                Object o = c.newInstance();
+                Field field = c.getField("status_bar_height");
+                int x = (Integer) field.get(o);
+                statusBarHeight = getResources().getDimensionPixelSize(x);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return statusBarHeight;
+    }
+
 
 }
