@@ -63,6 +63,9 @@ public class SideSlideView extends RelativeLayout {
     private int mMovedX = 0;
     private boolean mCanMove = false;
 
+    private float mOvalViewAlpha = 0.2f;
+    private float OVAL_VIEW_ALPHA = 0.2f;
+
     public SideSlideView(Context context) {
         this(context, null);
     }
@@ -90,7 +93,7 @@ public class SideSlideView extends RelativeLayout {
         LogNdu.i(TAG, "mScreenWidth: " + mScreenWidth + " mScreenHeight: " + mScreenHeight);
 
         mSideViewHeight = mScreenHeight / 3;
-        mSideViewWidth = mScreenWidth/ 25;
+        mSideViewWidth = mScreenWidth/ 20;
 
         mViewInScreenX = DataSaveUtils.getSideSlideX(context);
         mViewInScreenY = DataSaveUtils.getSideSlideY(context);
@@ -101,7 +104,7 @@ public class SideSlideView extends RelativeLayout {
 
         mOvalView.setWidthAndHeight(mSideViewWidth, mSideViewHeight);
         mOvalView.setColor(getResources().getColor(R.color.glass_grey));
-        mOvalView.setAlpha(0.2f);
+        mOvalView.setAlpha(mOvalViewAlpha);
 
         mLayoutParams = new WindowManager.LayoutParams();
         mLayoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
@@ -173,8 +176,9 @@ public class SideSlideView extends RelativeLayout {
             case MotionEvent.ACTION_MOVE:
 //                LogNdu.i(TAG, "Motion ACTION_MOVE");
                 int currentX = (int) event.getRawX();
-                mMovedX = Math.abs(currentX - mStartMoveX);
-                if (!mCanMove && mMovedX > mScreenWidth / 2) {
+                int newMovedX = Math.abs(currentX - mStartMoveX);
+
+                if (!mCanMove && newMovedX > mScreenWidth / 2) {
                     mCanMove = true;
                     mVibrator.vibrate(50);
                 }
@@ -182,7 +186,22 @@ public class SideSlideView extends RelativeLayout {
                     mViewInScreenX = currentX - mXInSideView;
                     mViewInScreenY = (int) event.getRawY() - mYInSideView;
                     updateViewPosition(mViewInScreenX, mViewInScreenY, TYPE_CHANGE_POSITHION_MOVE);
+                } else {
+                    long timeSpend = System.currentTimeMillis() - mStartMoveTime;
+                    if (timeSpend > 300) {
+                        if (newMovedX - mMovedX > 0) {
+                            mOvalViewAlpha += 0.03f;
+                        } else if (newMovedX - mMovedX < 0 && mOvalViewAlpha > OVAL_VIEW_ALPHA) {
+                            mOvalViewAlpha -= 0.02f;
+                        }
+                        if (mOvalViewAlpha <= 1){
+                            mOvalView.setAlpha(mOvalViewAlpha);
+                        } else {
+                            mOvalViewAlpha = 1;
+                        }
+                    }
                 }
+                mMovedX = newMovedX;
                 break;
             case MotionEvent.ACTION_UP:
                 LogNdu.i(TAG, "Motion ACTION_UP");
@@ -197,7 +216,10 @@ public class SideSlideView extends RelativeLayout {
                     doKeyType();
                     mMovedX = 0;
                 }
-                removeCallbacks(mRunnable);
+                if (mOvalViewAlpha != OVAL_VIEW_ALPHA) {
+                    mOvalViewAlpha = OVAL_VIEW_ALPHA;
+                    mOvalView.setAlpha(mOvalViewAlpha);
+                }
                 break;
         }
 //        mGestureDetector.onTouchEvent(event);//必须要加这句才会触发MySimpleOnGestureListener里事件
@@ -244,24 +266,23 @@ public class SideSlideView extends RelativeLayout {
     private void doKeyType() {
         int xDistance = mEndMoveX - mStartMoveX;
         int yDistance = mEndMoveY - mStartMoveY;
+        LogNdu.i(TAG, "xDistance: " + xDistance + " yDistance: " + yDistance);
         int xThreshold = mScreenWidth/10;
-        int yThreshold = mScreenHeight/20;
+        int yThreshold = mScreenWidth/12;
         int xDistanceAbs = Math.abs(xDistance);
         int yDistanceAbs = Math.abs(yDistance);
-        long timeSpend = System.currentTimeMillis() - mStartMoveTime;
-        if (timeSpend <= 0 || timeSpend > 400) return;
-//        int xMoveSpeed = (int) (xDistanceAbs*1000 / timeSpend);
-//        int yMoveSpeed = (int) (yDistanceAbs*1000 / timeSpend);
-//        LogNdu.i(TAG, "xMoveSpeed: " + xMoveSpeed + " yMoveSpeed: " + yMoveSpeed);
-        if (xDistanceAbs < xThreshold && yDistance > yThreshold) {
+
+        int angle = (int) (90 * Math.atan2(xDistanceAbs, yDistanceAbs));//以按下点为
+        LogNdu.i(TAG, "angle = " + angle);
+        if (yDistance > yThreshold && angle < 30) {
             //Down fling
             LogNdu.i(TAG, "doKeyType keyHome");
             keyHome();
-        } else if (xDistanceAbs < xThreshold && yDistance < -yThreshold) {
+        } else if (yDistance < 0 && angle < 50) {
             //Up fling
             LogNdu.i(TAG, "doKeyType keyMenu");
             keyMenu();
-        } else if (xDistanceAbs > xThreshold/6) {
+        } else if (xDistanceAbs > 0) {
             LogNdu.i(TAG, "doKeyType keyBack");
             keyBack();
         }
