@@ -26,8 +26,11 @@ Copyright dmitry.zaicew@gmail.com Dmitry Zaitsev
         <attr name="layoutMode">
             <enum name="normal" value="1" />
             <enum name="pie" value="2" />
+            <enum name="pieNormal" value="3" />
         </attr>
         <attr name="dividerWidth" format="dimension" />
     </declare-styleable>
+
+
     
 </resources>

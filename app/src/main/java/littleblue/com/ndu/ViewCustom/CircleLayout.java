@@ -52,6 +52,7 @@ public class CircleLayout extends ViewGroup {
 
 	public static final int LAYOUT_NORMAL = 1;
 	public static final int LAYOUT_PIE = 2;
+	public static final int LAYOUT_PIE_NORMAL = 3;
 	
 	private int mLayoutMode = LAYOUT_NORMAL;
 	
@@ -353,7 +354,7 @@ public class CircleLayout extends ViewGroup {
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		LogNdu.i(TAG, "dispatchTouchEvent ");
-		if(mLayoutMode == LAYOUT_NORMAL) {
+		if(mLayoutMode == LAYOUT_NORMAL || mLayoutMode == LAYOUT_PIE_NORMAL) {
 			return super.dispatchTouchEvent(ev);
 		}
 		

@@ -39,11 +39,19 @@ public class OvalView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        LogNdu.i(TAG, "onMeasure widthMeasureSpec: " + widthMeasureSpec + " heightMeasureSpec: " + heightMeasureSpec);
+        LogNdu.i(TAG, "onMeasure getMeasuredWidth: " + getMeasuredWidth() + " getMeasuredHeight: " + getMeasuredHeight());
+        if (getMeasuredWidth() > 0 || getMeasuredHeight() > 0) {
+            mViewWidth = getMeasuredWidth();
+            mViewHeight = getMeasuredHeight();
+            setMeasuredDimension(mViewWidth, mViewHeight);
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         //super.onDraw(canvas);
+        LogNdu.i(TAG, "onDraw");
         RectF rectF = new RectF();//矩形
         rectF.top = 0;
         rectF.left = 0;
@@ -52,9 +60,9 @@ public class OvalView extends View {
 
         Paint paint = new Paint();
         paint.setColor(mColor);
-        canvas.drawOval(rectF, paint);
+//        canvas.drawOval(rectF, paint);
 //        canvas.drawRoundRect(rectF, mViewWidth, mViewWidth*6, paint);//调整rx和ry可以得到带不同的弧度圆角的矩形
-//        canvas.drawRoundRect(0, 0, mViewWidth, mViewHeight, mViewWidth, mViewWidth*5, paint);//调整rx和ry可以得到带不同的弧度圆角的矩形
+        canvas.drawRoundRect(0, 0, mViewWidth, mViewHeight, mViewWidth, mViewWidth*5, paint);//调整rx和ry可以得到带不同的弧度圆角的矩形
     }
 
     public void setWidthAndHeight(int width, int height) {

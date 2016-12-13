@@ -10,14 +10,25 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="littleblue.com.ndu.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <!--<littleblue.com.ndu.ViewCustom.CircleLayout
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        app:layoutMode="pieNormal">
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="200dp"/>
+    </littleblue.com.ndu.ViewCustom.CircleLayout>-->
 
     <littleblue.com.ndu.ViewCustom.OvalView
+        android:layout_width="20dp"
+        android:layout_height="200dp"
+        android:background="@color/lightGrey"/>
+    
+    <!--<Button
         android:layout_width="200dp"
-        android:layout_height="200dp" />
+        android:layout_height="200dp"/>-->
+
+
 
  <!--   <littleblue.com.ndu.ViewCustom.CircleLayout
         android:layout_width="50dp"
