@@ -15,6 +15,7 @@ public class DataSaveUtils {
     private static String Key_Speed_Box_Y = "Key_Speed_Box_Y";
     private static String Key_Side_Slide_X = "Key_Side_Slide_X";
     private static String Key_Side_Slide_Y = "Key_Side_Slide_Y";
+    private static String Key_Need_Feedback = "Key_Need_Feedback";
 
     public static void saveSpeedBoxX(Context context, int x) {
         SharedPreferences preferences = context.getSharedPreferences(PRE, Context.MODE_PRIVATE);
@@ -67,4 +68,18 @@ public class DataSaveUtils {
         int value = preferences.getInt(Key_Side_Slide_Y, 0);
         return value;
     }
+
+    public static void saveKeyNeedFeedback(Context context, boolean y) {
+        SharedPreferences preferences = context.getSharedPreferences(PRE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(Key_Need_Feedback, y);
+        editor.commit();
+    }
+
+    public static boolean getKeyNeedFeedback(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(PRE, Context.MODE_PRIVATE);
+        boolean value = preferences.getBoolean(Key_Need_Feedback, true);
+        return value;
+    }
+
 }

@@ -25,7 +25,7 @@ android {
                 //def fileName = "demo_${variant.productFlavors[0].name}-${defaultConfig.versionCode}-${defaultConfig.versionName}-${releaseTime() }.apk"
                 def fileName = "NDU.apk"
                 output.outputFile = new File(outputFile.parent, fileName)
-                println  outputFile.parent
+                println outputFile.parent
             }
         }
     }
@@ -33,6 +33,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:design:24.2.0'
+    testCompile 'junit:junit:4.12'
 }

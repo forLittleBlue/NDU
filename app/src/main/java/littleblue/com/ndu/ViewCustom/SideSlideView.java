@@ -1,15 +1,12 @@
 package littleblue.com.ndu.ViewCustom;
 
 import android.app.Instrumentation;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.Vibrator;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -62,9 +59,10 @@ public class SideSlideView extends RelativeLayout {
     private int mYInSideView = 0;
     private int mMovedX = 0;
     private boolean mCanMove = false;
+    private boolean mNeedFeedback = true;
 
-    private float mOvalViewAlpha = 0.2f;
-    private float OVAL_VIEW_ALPHA = 0.2f;
+    private float mOvalViewAlpha;
+    private float OVAL_VIEW_ALPHA = 0.3f;
 
     public SideSlideView(Context context) {
         this(context, null);
@@ -74,6 +72,7 @@ public class SideSlideView extends RelativeLayout {
         super(context, attr);
         mContext = context;
         if (isLandscapeScreen()) return;
+        mSideSlideLauncherView = new SideSlideLauncherView(mContext);
         initSideSlideView(context);
         mGestureDetector = new GestureDetector(context, new MySimpleOnGestureListener());//利用GestureDetector的构造方法传入自定义的SimpleOnGestureListener
     }
@@ -95,6 +94,7 @@ public class SideSlideView extends RelativeLayout {
         mSideViewHeight = mScreenHeight / 3;
         mSideViewWidth = mScreenWidth/ 20;
 
+        mNeedFeedback = DataSaveUtils.getKeyNeedFeedback(context);
         mViewInScreenX = DataSaveUtils.getSideSlideX(context);
         mViewInScreenY = DataSaveUtils.getSideSlideY(context);
         if(mViewInScreenY == 0) {
@@ -102,6 +102,7 @@ public class SideSlideView extends RelativeLayout {
             mViewInScreenY = mScreenHeight/5 * 2;
         }
 
+        mOvalViewAlpha = OVAL_VIEW_ALPHA;
         mOvalView.setWidthAndHeight(mSideViewWidth, mSideViewHeight);
         mOvalView.setColor(getResources().getColor(R.color.glass_grey));
         mOvalView.setAlpha(mOvalViewAlpha);
@@ -129,16 +130,6 @@ public class SideSlideView extends RelativeLayout {
         if (TYPE_CHANGE_SIZE == type || TYPE_CHANGE_ALL == type) {
             mLayoutParams.width = width;
             mLayoutParams.height = height;
-            //mLayoutParams.x = mViewInScreenX - mMovedX;
-
-           /* if (TYPE_CHANGE_SIZE == type) {
-                int newHeight = height;
-                if (mMovedX-mSideViewWidth>0) {
-//                newHeight= height * (mSideViewWidth/(mMovedX-mSideViewWidth));
-                }
-                mOvalView.setWidthAndHeight(width, newHeight);
-                mOvalView.postInvalidate();
-            }*/
         }
         if (TYPE_CHANGE_POSITHION_MOVE == type || TYPE_CHANGE_ALL == type) {
             mLayoutParams.x = x;
@@ -160,10 +151,11 @@ public class SideSlideView extends RelativeLayout {
         mWindowManager.updateViewLayout(mSideSlideView, mLayoutParams);
     }
 
+    private SideSlideLauncherView mSideSlideLauncherView = null;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //LogNdu.i(TAG, "Motion event: " + event.getAction());
-        LogNdu.i(TAG, "xInScreen = " + event.getRawX() + "; yInScreen = " + event.getRawY());
+        //LogNdu.i(TAG, "xInScreen = " + event.getRawX() + "; yInScreen = " + event.getRawY());
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 LogNdu.i(TAG, "Motion ACTION_DOWN");
@@ -177,8 +169,10 @@ public class SideSlideView extends RelativeLayout {
 //                LogNdu.i(TAG, "Motion ACTION_MOVE");
                 int currentX = (int) event.getRawX();
                 int newMovedX = Math.abs(currentX - mStartMoveX);
-
-                if (!mCanMove && newMovedX > mScreenWidth / 2) {
+                long timeSpend = System.currentTimeMillis() - mStartMoveTime;
+                if (!mCanMove
+                        && newMovedX > (mScreenWidth/2-mSideViewWidth/2) //滑动超过屏幕一半宽度
+                        && timeSpend < 400) {
                     mCanMove = true;
                     mVibrator.vibrate(50);
                 }
@@ -187,12 +181,20 @@ public class SideSlideView extends RelativeLayout {
                     mViewInScreenY = (int) event.getRawY() - mYInSideView;
                     updateViewPosition(mViewInScreenX, mViewInScreenY, TYPE_CHANGE_POSITHION_MOVE);
                 } else {
-                    long timeSpend = System.currentTimeMillis() - mStartMoveTime;
-                    if (timeSpend > 300) {
+                    if (timeSpend > 400) {
+                        if (mSideSlideLauncherView == null) {
+                            mSideSlideLauncherView = new SideSlideLauncherView(mContext);
+                        }
                         if (newMovedX - mMovedX > 0) {
                             mOvalViewAlpha += 0.03f;
+                            if (mSideSlideLauncherView != null) {
+                                mSideSlideLauncherView.updateViewX(true);
+                            }
                         } else if (newMovedX - mMovedX < 0 && mOvalViewAlpha > OVAL_VIEW_ALPHA) {
                             mOvalViewAlpha -= 0.02f;
+                            if (mSideSlideLauncherView != null) {
+                                mSideSlideLauncherView.updateViewX(false);
+                            }
                         }
                         if (mOvalViewAlpha <= 1){
                             mOvalView.setAlpha(mOvalViewAlpha);
@@ -213,13 +215,14 @@ public class SideSlideView extends RelativeLayout {
                     DataSaveUtils.saveSideSlideX(mContext, mViewInScreenX);
                     DataSaveUtils.saveSideSlideY(mContext, mViewInScreenY);
                 } else {
-                    doKeyType();
-                    mMovedX = 0;
+                    if (mOvalViewAlpha != OVAL_VIEW_ALPHA) {
+                        mOvalViewAlpha = OVAL_VIEW_ALPHA;
+                        mOvalView.setAlpha(mOvalViewAlpha);
+                    } else {
+                        doKeyType();
+                    }
                 }
-                if (mOvalViewAlpha != OVAL_VIEW_ALPHA) {
-                    mOvalViewAlpha = OVAL_VIEW_ALPHA;
-                    mOvalView.setAlpha(mOvalViewAlpha);
-                }
+                mMovedX = 0;
                 break;
         }
 //        mGestureDetector.onTouchEvent(event);//必须要加这句才会触发MySimpleOnGestureListener里事件
@@ -268,7 +271,7 @@ public class SideSlideView extends RelativeLayout {
         int yDistance = mEndMoveY - mStartMoveY;
         LogNdu.i(TAG, "xDistance: " + xDistance + " yDistance: " + yDistance);
         int xThreshold = mScreenWidth/10;
-        int yThreshold = mScreenWidth/12;
+        int yThreshold = mScreenWidth/16;
         int xDistanceAbs = Math.abs(xDistance);
         int yDistanceAbs = Math.abs(yDistance);
 
@@ -276,15 +279,20 @@ public class SideSlideView extends RelativeLayout {
         LogNdu.i(TAG, "angle = " + angle);
         if (yDistance > yThreshold && angle < 30) {
             //Down fling
-            LogNdu.i(TAG, "doKeyType keyHome");
-            keyHome();
-        } else if (yDistance < 0 && angle < 50) {
-            //Up fling
             LogNdu.i(TAG, "doKeyType keyMenu");
             keyMenu();
+        } else if (yDistance < 0 && angle < 50) {
+            //Up fling
+            LogNdu.i(TAG, "doKeyType keyHome");
+            keyHome();
         } else if (xDistanceAbs > 0) {
             LogNdu.i(TAG, "doKeyType keyBack");
             keyBack();
+            if (mSideSlideLauncherView != null) {
+                //mSideSlideLauncherView.removeLauncherView();
+                //mSideSlideLauncherView = null;
+                mSideSlideLauncherView.disappearView();
+            }
         }
     }
 
@@ -292,10 +300,13 @@ public class SideSlideView extends RelativeLayout {
         new Thread(){
             public void run() {
                 try{
+                    shotVibrate();
                     Instrumentation inst = new Instrumentation();
                     inst.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
-                }
-                catch (Exception e) {
+                    /*String keyCommand = "input keyevent " + KeyEvent.KEYCODE_BACK;
+                    Runtime runtime = Runtime.getRuntime();
+                    Process proc = runtime.exec(keyCommand);*/
+                } catch (Exception e) {
                     LogNdu.e("Exception when onBack", e.toString());
                 }
             }
@@ -306,10 +317,10 @@ public class SideSlideView extends RelativeLayout {
         new Thread(){
             public void run() {
                 try{
+                    shotVibrate();
                     Instrumentation inst = new Instrumentation();
                     inst.sendKeyDownUpSync(KeyEvent.KEYCODE_HOME);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     LogNdu.e("Exception when onBack", e.toString());
                 }
             }
@@ -320,14 +331,25 @@ public class SideSlideView extends RelativeLayout {
         new Thread(){
             public void run() {
                 try{
+                    shotVibrate();
                     Instrumentation inst = new Instrumentation();
                     inst.sendKeyDownUpSync(KeyEvent.KEYCODE_MENU);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     LogNdu.e("Exception when onBack", e.toString());
                 }
             }
         }.start();
+    }
+
+    private void shotVibrate() {
+        if (mNeedFeedback) {
+            mVibrator.vibrate(50);
+        }
+    }
+
+    public void setNeedFeedback(Boolean isNeed) {
+        mNeedFeedback = isNeed;
+        DataSaveUtils.saveKeyNeedFeedback(mContext, isNeed);
     }
 
     private Runnable mRunnable = new Runnable() {
