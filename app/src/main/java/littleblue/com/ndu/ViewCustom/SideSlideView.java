@@ -1,5 +1,7 @@
 package littleblue.com.ndu.ViewCustom;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -152,6 +154,7 @@ public class SideSlideView extends RelativeLayout {
     }
 
     private SideSlideLauncherView mSideSlideLauncherView = null;
+    private boolean isStartedAnimation = false;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //LogNdu.i(TAG, "Motion event: " + event.getAction());
@@ -185,7 +188,34 @@ public class SideSlideView extends RelativeLayout {
                         if (mSideSlideLauncherView == null) {
                             mSideSlideLauncherView = new SideSlideLauncherView(mContext);
                         }
-                        if (newMovedX - mMovedX > 0) {
+                        if (!isStartedAnimation) {
+                            isStartedAnimation = true;
+                            ObjectAnimator translationX = ObjectAnimator.ofFloat(mSideSlideLauncherView, "translationX", 500f, 0.0f, 500f);
+                            translationX.setDuration(1500).start();
+                            translationX.addListener(new Animator.AnimatorListener() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    LogNdu.i(TAG, "translationX.addListener onAnimationStart: ");
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    LogNdu.i(TAG, "translationX.addListener onAnimationEnd: ");
+                                }
+
+                                @Override
+                                public void onAnimationCancel(Animator animation) {
+                                    LogNdu.i(TAG, "translationX.addListener onAnimationCancel: ");
+                                }
+
+                                @Override
+                                public void onAnimationRepeat(Animator animation) {
+                                    LogNdu.i(TAG, "translationX.addListener onAnimationRepeat: ");
+                                }
+                            });
+                        }
+
+                        /*if (newMovedX - mMovedX > 0) {
                             mOvalViewAlpha += 0.03f;
                             if (mSideSlideLauncherView != null) {
                                 mSideSlideLauncherView.updateViewX(true);
@@ -195,7 +225,7 @@ public class SideSlideView extends RelativeLayout {
                             if (mSideSlideLauncherView != null) {
                                 mSideSlideLauncherView.updateViewX(false);
                             }
-                        }
+                        }*/
                         if (mOvalViewAlpha <= 1){
                             mOvalView.setAlpha(mOvalViewAlpha);
                         } else {
@@ -215,10 +245,13 @@ public class SideSlideView extends RelativeLayout {
                     DataSaveUtils.saveSideSlideX(mContext, mViewInScreenX);
                     DataSaveUtils.saveSideSlideY(mContext, mViewInScreenY);
                 } else {
-                    if (mOvalViewAlpha != OVAL_VIEW_ALPHA) {
+                    if (isStartedAnimation) {
+                        isStartedAnimation = false;
+                    }
+                    /*if (mOvalViewAlpha != OVAL_VIEW_ALPHA) {
                         mOvalViewAlpha = OVAL_VIEW_ALPHA;
                         mOvalView.setAlpha(mOvalViewAlpha);
-                    } else {
+                    }*/ else {
                         doKeyType();
                     }
                 }
@@ -288,11 +321,11 @@ public class SideSlideView extends RelativeLayout {
         } else if (xDistanceAbs > 0) {
             LogNdu.i(TAG, "doKeyType keyBack");
             keyBack();
-            if (mSideSlideLauncherView != null) {
+            /*if (mSideSlideLauncherView != null) {
                 //mSideSlideLauncherView.removeLauncherView();
                 //mSideSlideLauncherView = null;
                 mSideSlideLauncherView.disappearView();
-            }
+            }*/
         }
     }
 

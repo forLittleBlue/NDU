@@ -52,7 +52,7 @@ public class SideSlideLauncherView extends RelativeLayout {
             }
         });
 
-        mViewInscreenX = -mViewWidth;
+        mViewInscreenX = 0;//-mViewWidth;
         mLayoutParams = new WindowManager.LayoutParams();
         mLayoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
         mLayoutParams.format = PixelFormat.RGBA_8888;
@@ -90,6 +90,13 @@ public class SideSlideLauncherView extends RelativeLayout {
     public void disappearView() {
         mViewInscreenX = -mViewWidth;
         mLayoutParams.x = mViewInscreenX;
+        mWindowManager.updateViewLayout(mSideSlideLauncherView, mLayoutParams);
+    }
+
+    public void updateViewWidth() {
+        mViewInscreenX = -mViewWidth;
+        mLayoutParams.x = mViewInscreenX;
+        mLayoutParams.width = 2*mViewWidth;
         mWindowManager.updateViewLayout(mSideSlideLauncherView, mLayoutParams);
     }
 
