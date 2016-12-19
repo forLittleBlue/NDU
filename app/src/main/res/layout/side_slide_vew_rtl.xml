@@ -2,12 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
     >
-
-    <littleblue.com.ndu.ViewCustom.OvalView
-        android:id="@+id/side_oval_view"
-        android:layout_width="20dp"
-        android:layout_height="match_parent"/>
 
 </LinearLayout>
