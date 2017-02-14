@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">NDU</string>
     <string name="title_activity_test">TestActivity</string>
+    <string name="how_to_use_text">"使用前先去设置-更多设置-权限管理中赋予该应用悬浮窗权限。用法：
+        \n1、在侧边bar上往屏幕中间滑，实现Back键功能；\n2、在侧边bar上往下滑，调出近期任务；\n3、在侧边bar上往上滑，实现Home键功能；\n4、从侧边bar滑过屏幕中间时可以移动bar位置。
+        \nDemo By 谢青宇 For vivo phone\n推荐用曲面屏手机体验"</string>
 </resources>

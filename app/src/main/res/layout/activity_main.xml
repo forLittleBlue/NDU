@@ -10,69 +10,25 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="littleblue.com.ndu.MainActivity">
 
-    <!--<littleblue.com.ndu.ViewCustom.CircleLayout
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        app:layoutMode="pieNormal">
-        <Button
-            android:layout_width="200dp"
-            android:layout_height="200dp"/>
-    </littleblue.com.ndu.ViewCustom.CircleLayout>-->
+    <TextView
+        android:id="@+id/how_to_use_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/how_to_use_text"
+        android:textSize="15dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
 
-    <littleblue.com.ndu.ViewCustom.OvalView
-        android:layout_width="20dp"
-        android:layout_height="200dp"
-        android:background="@color/lightGrey"/>
-    
-    <!--<Button
-        android:layout_width="200dp"
-        android:layout_height="200dp"/>-->
+    <Switch
+        android:text="震动反馈"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switch_open_vibrate"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:textColor="@color/grey_blue"
+        android:layout_marginTop="95dp"
+        android:layout_below="@+id/how_to_use_text"
+        android:layout_centerHorizontal="true" />
 
-
-
- <!--   <littleblue.com.ndu.ViewCustom.CircleLayout
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@android:color/white"
-        app:layoutMode="pie"
-        app:innerRadius="5dp"
-        app:angleRange="180"
-        app:innerCircle="@android:color/black">
-
-        <View
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="#ff0000" />
-
-        <View
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="#00ff00" />
-
-        <View
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="#ff0000" />
-
-        <View
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="#00ff00" />
-
-        <View
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="#0000ff" />
-
-        <View
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="#ffff00" />
-
-        <View
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="#ff00ff" />
-
-    </littleblue.com.ndu.ViewCustom.CircleLayout>-->
 </RelativeLayout>

@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.Vibrator;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -60,6 +61,7 @@ public class SideSlideView extends LinearLayout {
     private int mEndPointY = 0;
     private int mXInSideView = 0;
     private int mYInSideView = 0;
+    private int mLastOrientation;
     private long mMovedMaxDistanceX = 0;
     private boolean mCanMove = false;
     private boolean mNeedFeedback = true;
@@ -79,6 +81,30 @@ public class SideSlideView extends LinearLayout {
         //mSideSlideLauncherView = new SideSlideLauncherView(mContext);
         initSideSlideView(context);
         mGestureDetector = new GestureDetector(context, new MySimpleOnGestureListener());//利用GestureDetector的构造方法传入自定义的SimpleOnGestureListener
+        mLastOrientation = context.getResources().getConfiguration().orientation;
+    }
+
+    /**
+     * 监听屏幕方向变化，横屏时取消bar显示
+     * @param newConfig
+     */
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mLastOrientation != newConfig.orientation) {
+            mLastOrientation = newConfig.orientation;
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                LogNdu.i(TAG, "onConfigurationChanged now is ORIENTATION_LANDSCAPE");
+                //updateViewSize(0, 0);
+                mLayoutParams.x = -mSideViewWidth;
+                mWindowManager.updateViewLayout(mSideSlideView, mLayoutParams);
+            } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                LogNdu.i(TAG, "onConfigurationChanged now is ORIENTATION_PORTRAIT");
+                //updateViewSize(mSideViewWidth, mSideViewHeight);
+                mLayoutParams.x = mViewInScreenX;
+                mWindowManager.updateViewLayout(mSideSlideView, mLayoutParams);
+            }
+        }
     }
 
     private void initSideSlideView(Context context) {
@@ -95,8 +121,8 @@ public class SideSlideView extends LinearLayout {
         mStatusBarHeight = getStatusBarHeight();
         LogNdu.i(TAG, "mScreenWidth: " + mScreenWidth + " mScreenHeight: " + mScreenHeight);
 
-        mSideViewHeight = mScreenHeight / 3;
-        mSideViewWidth = mScreenWidth/ 20;
+        mSideViewHeight = mScreenHeight / 4;
+        mSideViewWidth = mScreenWidth/ 17;
 
         mNeedFeedback = DataSaveUtils.getKeyNeedFeedback(context);
         mViewInScreenX = DataSaveUtils.getSideSlideX(context);
@@ -167,7 +193,6 @@ public class SideSlideView extends LinearLayout {
             //以上根据在左边还是右边设置不同的起点
             mLayoutParams.x = mViewInScreenX = -mSideViewWidth/2;
         }
-
         mWindowManager.updateViewLayout(mSideSlideView, mLayoutParams);
         DataSaveUtils.saveSlideBarIsOnLeft(mContext, isSlideBarOnLeft);
     }
@@ -215,7 +240,7 @@ public class SideSlideView extends LinearLayout {
                 mXInSideView = (int) event.getX();
                 mYInSideView = (int) event.getY();
                 mMovedMaxDistanceX = 0;
-                if (mMoveStartTime - mMoveEndTime < Double_Slide_Time && !isDoubleSlide) {
+                /*if (mMoveStartTime - mMoveEndTime < Double_Slide_Time && !isDoubleSlide) {
                     if (mLastKeyType == KeyEvent.KEYCODE_BACK) {
                         isDoubleSlide = true;
                         removeCallbacks(mKeyBackRunnable);
@@ -225,8 +250,8 @@ public class SideSlideView extends LinearLayout {
                     }
                 } else {
                     isDoubleSlide = false;
-                }
-                LogNdu.i(TAG, "isDoubleSlide = " + isDoubleSlide);
+                }*/
+                //LogNdu.i(TAG, "isDoubleSlide = " + isDoubleSlide);
                 break;
             case MotionEvent.ACTION_MOVE:
 //                LogNdu.i(TAG, "Motion ACTION_MOVE");
@@ -244,44 +269,6 @@ public class SideSlideView extends LinearLayout {
                     mViewInScreenX = currentX - mXInSideView;
                     mViewInScreenY = (int) event.getRawY() - mYInSideView;
                     updateViewPosition(mViewInScreenX, mViewInScreenY, TYPE_CHANGE_POSITHION_MOVE);
-                } else {
-                    if (false) {
-                        if (mSideSlideLauncherView == null) {
-                            //mSideSlideLauncherView = new SideSlideLauncherView(mContext);
-                        }
-
-                        if (!isStartedAnimation) {
-                            isStartedAnimation = true;
-                            ObjectAnimator translationX = ObjectAnimator.ofFloat(mSideSlideLauncherView, "translationX", 500f, 0.0f, 500f);
-                            translationX.setDuration(1500).start();
-                            translationX.addListener(new Animator.AnimatorListener() {
-                                @Override
-                                public void onAnimationStart(Animator animation) {
-                                    LogNdu.i(TAG, "translationX.addListener onAnimationStart: ");
-                                }
-
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    LogNdu.i(TAG, "translationX.addListener onAnimationEnd: ");
-                                }
-
-                                @Override
-                                public void onAnimationCancel(Animator animation) {
-                                    LogNdu.i(TAG, "translationX.addListener onAnimationCancel: ");
-                                }
-
-                                @Override
-                                public void onAnimationRepeat(Animator animation) {
-                                    LogNdu.i(TAG, "translationX.addListener onAnimationRepeat: ");
-                                }
-                            });
-                        }
-                        if (mOvalViewAlpha <= 1){
-                            mOvalView.setAlpha(mOvalViewAlpha);
-                        } else {
-                            mOvalViewAlpha = 1;
-                        }
-                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -315,17 +302,20 @@ public class SideSlideView extends LinearLayout {
     private boolean isDoubleSlide = false;
     private int mLastKeyType = -1;
     private void doKeyType() {
+        if (mMoveEndTime - mMoveStartTime > 800) {
+            return;
+        }
         int xDistance = mEndPointX - mStartPointX;
         int yDistance = mEndPointY - mStartPointY;
-        LogNdu.i(TAG, "xDistance: " + xDistance + " yDistance: " + yDistance);
+        //LogNdu.i(TAG, "xDistance: " + xDistance + " yDistance: " + yDistance);
         int xThreshold = mScreenWidth/10;
         int yThreshold = mScreenWidth/16;
         int xDistanceAbs = Math.abs(xDistance);
         int yDistanceAbs = Math.abs(yDistance);
 
         int angle = (int) (90 * Math.atan2(xDistanceAbs, yDistanceAbs));//以按下点为
-        LogNdu.i(TAG, "angle = " + angle);
-        if (yDistance > yThreshold && angle < 30) {
+        //LogNdu.i(TAG, "angle = " + angle);
+        if (yDistance > 0 && angle < 20) {
             //Down fling
             mLastKeyType = KeyEvent.KEYCODE_MENU;
             keyMenu();
@@ -413,9 +403,8 @@ public class SideSlideView extends LinearLayout {
         }
     }
 
-    public void setNeedFeedback(Boolean isNeed) {
-        mNeedFeedback = isNeed;
-        DataSaveUtils.saveKeyNeedFeedback(mContext, isNeed);
+    public void setNeedFeedback() {
+        mNeedFeedback = DataSaveUtils.getKeyNeedFeedback(mContext);
     }
 
     @Override

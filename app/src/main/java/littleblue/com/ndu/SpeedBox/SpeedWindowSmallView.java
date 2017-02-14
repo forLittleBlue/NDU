@@ -76,6 +76,7 @@ public class SpeedWindowSmallView extends RelativeLayout {
         LogNdu.i(TAG, "mScreenWidth: " + mScreenWidth + " mScreenHeight: " + mScreenHeight);
 
         mBoxInScreenX = DataSaveUtils.getSpeedBoxX(context);
+        if (mBoxInScreenX < 0) mBoxInScreenX = mScreenWidth/6*2;
         mBoxInScreenY = DataSaveUtils.getSpeedBoxY(context);
         //mBoxInScreenY = mScreenHeight/2;
         checkRange();

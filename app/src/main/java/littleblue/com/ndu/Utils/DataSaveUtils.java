@@ -8,14 +8,14 @@ import android.content.SharedPreferences;
  */
 
 public class DataSaveUtils {
-    private String TAG = "DataSaveUtils";
+    private static final String TAG = "DataSaveUtils";
 
-    private static String PRE = "DataSaveUtils";
+    public static final String PRE = "DataSaveUtils";
     private static String Key_Speed_Box_X = "Key_Speed_Box_X";
     private static String Key_Speed_Box_Y = "Key_Speed_Box_Y";
     private static String Key_Side_Slide_X = "Key_Side_Slide_X";
     private static String Key_Side_Slide_Y = "Key_Side_Slide_Y";
-    private static String Key_Need_Feedback = "Key_Need_Feedback";
+    public static final String Key_Need_Feedback = "Key_Need_Feedback";
     private static String Key_Slidebar_Side_ = "Key_Slidebar_Side_";
 
     public static void saveSpeedBoxX(Context context, int x) {
@@ -27,7 +27,7 @@ public class DataSaveUtils {
 
     public static int getSpeedBoxX(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(PRE, Context.MODE_PRIVATE);
-        int value = preferences.getInt(Key_Speed_Box_X, 0);
+        int value = preferences.getInt(Key_Speed_Box_X, -1);
         return value;
     }
 
@@ -79,7 +79,7 @@ public class DataSaveUtils {
 
     public static boolean getKeyNeedFeedback(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(PRE, Context.MODE_PRIVATE);
-        boolean value = preferences.getBoolean(Key_Need_Feedback, true);
+        boolean value = preferences.getBoolean(Key_Need_Feedback, false);
         return value;
     }
 
